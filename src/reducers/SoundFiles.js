@@ -1,22 +1,25 @@
-import { filter, sample, random } from 'lodash';
+import { filter, flatten, sample, random } from 'lodash';
 
 import {
   GET_DATE,
+  SET_PHRASE,
   GET_PREFIX,
-  LOAD_DAYS_OF_THE_WEEK,
-  LOAD_DAYS_OF_THE_MONTH,
-  LOAD_MONTHS,
-  LOAD_PREFIXES,
 } from '../actions/SoundFiles';
 
+import daysOfTheWeek from '../data/daysOfTheWeek';
+import daysOfTheMonth from '../data/daysOfTheMonth';
+import months from '../data/months';
+
 const initialState = {
-  currentDate: '',
-  currentMonth: '',
-  currentPrefix: '',
-  daysOfTheWeek: [],
-  daysOfTheMonth: [],
-  months: [],
-  prefixes: [],
+  currentDate: [],
+  currentPrefix: {},
+  currentPhrase: [],
+  daysOfTheWeek: daysOfTheWeek,
+  daysOfTheMonth: daysOfTheMonth,
+  months: months,
+  prefixes: [{
+    text: { en: `It's` }, uri: 'sounds/prefixes/its-sb.mp3',
+  }],
 };
 
 const padWithZero = (num) => {
@@ -37,19 +40,23 @@ const getDateIndexes = () => {
   };
 };
 
-filterFiles = (collection, index) => {
+const filterFiles = (collection, index) => {
   return filter(collection, (item) => {
-    const rx = new RegExp(`^${index}-`)
-    return rx.test(item);
+    const rx = new RegExp(`\/${index}-`)
+    return rx.test(item.uri);
   });
-}
-
-const getDate = () => {
 };
-
 
 const SoundFiles = (state = initialState, action) => {
   switch (action.type) {
+    case SET_PHRASE: {
+      const currentPhrase = flatten([ state.currentPrefix, state.currentDate ])
+      return {
+        ...state,
+        currentPhrase,
+      };
+    }
+
     case GET_DATE: {
       const { dayOfWeek, dayOfMonth, month } = getDateIndexes();
 
@@ -58,13 +65,13 @@ const SoundFiles = (state = initialState, action) => {
           const months = filterFiles(state.months, month);
           const daysOfTheMonth = filterFiles(state.daysOfTheMonth, dayOfMonth);
           return [
-            `months/${sample(months)}`,
-            `daysOfTheMonth/${sample(daysOfTheMonth)}`
+            sample(months),
+            sample(daysOfTheMonth),
           ]
         },
         () => {
           const daysOfTheWeek = filterFiles(state.daysOfTheWeek, dayOfWeek);
-          return [`daysOfTheWeek/${sample(daysOfTheWeek)}`]
+          return [sample(daysOfTheWeek)]
         },
       ];
 
@@ -78,36 +85,10 @@ const SoundFiles = (state = initialState, action) => {
     }
 
     case GET_PREFIX: {
-      return Object.assign({}, state, {
-        month: action.i
-      })
-    }
-
-    case LOAD_DAYS_OF_THE_WEEK: {
+      const currentPrefix = sample(state.prefixes);
       return {
         ...state,
-        daysOfTheWeek: action.daysOfTheWeek,
-      };
-    }
-
-    case LOAD_DAYS_OF_THE_MONTH: {
-      return {
-        ...state,
-        daysOfTheMonth: action.daysOfTheMonth,
-      };
-    }
-
-    case LOAD_MONTHS: {
-      return {
-        ...state,
-        months: action.months,
-      };
-    }
-
-    case LOAD_PREFIXES: {
-      return {
-        ...state,
-        prefixes: action.prefixes,
+        currentPrefix,
       };
     }
 

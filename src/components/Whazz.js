@@ -6,8 +6,9 @@ import {
   View
 } from 'react-native';
 import Sound from 'react-native-sound';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux';
-import { flatten } from 'lodash';
+import { flatten, map } from 'lodash';
 
 import { bindActionCreators } from 'redux';
 import * as actionCreators from '../actions/SoundFiles';
@@ -21,6 +22,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   buttonText: {
     color: '#fff'
   },
@@ -33,20 +35,35 @@ const styles = StyleSheet.create({
   },
   greenButton: {
     backgroundColor: '#4a5',
+  },
+
+  headerRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerButton: {
+    height: 60,
+    width: '90%',
+    alignItems: 'center',
+    padding: 10,
+  },
+  headerText: {
+    fontSize: 20,
+    marginBottom: 10,
+    marginRight: 10,
   }
 });
 
 class Whazz extends Component {
   async componentWillMount () {
-    const { loadDaysOfTheWeek, loadDaysOfTheMonth, loadMonths, loadPrefixes } = this.props.actions;
-    await loadDaysOfTheWeek();
-    await loadDaysOfTheMonth();
-    await loadMonths();
-    await loadPrefixes();
+    this.getPhrase();
   }
 
-  getDate = () => {
-    this.props.actions.getDate();
+  getPhrase = () => {
+    const { getPhrase } = this.props.actions;
+    getPhrase();
   }
 
   playSound = (filepath) => {
@@ -61,20 +78,24 @@ class Whazz extends Component {
   }
 
   sayPhrase = async () => {
-    const { currentDate } = this.props;
+    const { currentPhrase } = this.props;
 
-    const soundQueue = flatten(['prefixes/its-sb.mp3', currentDate]);
+    const soundQueue = currentPhrase;
     for (const sound of soundQueue) {
-      const filepath = `sounds/${sound}`;
+      const filepath = sound.uri;
       await this.playSound(filepath);
     };
   }
 
   render () {
+    const currentDate = map(this.props.currentPhrase, item => item.text.en).join(' ');
     return (
       <View style={styles.container}>
-        <TouchableHighlight style={styles.button} onPress={this.getDate} style={[styles.button]}>
-          <Text style={styles.buttonText}>Get Date</Text>
+        <TouchableHighlight onPress={this.getPhrase} style={[styles.headerButton]}>
+          <View style={styles.headerRow}>
+            <Text style={styles.headerText}>{ currentDate }</Text>
+            <Icon name="ios-refresh" color="#4F8EF7" size={30} style={{marginBottom: 5}} />
+          </View>
         </TouchableHighlight>
         <TouchableHighlight style={styles.button} onPress={this.sayPhrase} style={[styles.button, styles.greenButton]}>
           <Text style={styles.buttonText}>Say it</Text>
@@ -85,7 +106,7 @@ class Whazz extends Component {
 }
 
 const mapStateToProps = state => {
-  return { currentDate: state.default.SoundFiles.currentDate }
+  return { currentPhrase: state.default.SoundFiles.currentPhrase }
 };
 
 const mapDispatchToProps = (dispatch) => {
