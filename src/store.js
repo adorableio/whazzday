@@ -38,15 +38,10 @@ const middlewares = [
   storage.createMiddleware(engine, BLACKLISTED_ACTIONS, WHITELISTED_ACTIONS)
 ];
 
-let composeStrategy = compose;
-// if (__DEV__) {
-//  composeStrategy = require('remote-redux-devtools').composeWithDevTools;
-// }
-
 const storeWithMiddleware = createStore(reducer,
-  composeStrategy(
+  compose(
     applyMiddleware(...middlewares),
-    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+    __DEV__ && window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
   )
 );
 
