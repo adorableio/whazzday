@@ -1,4 +1,5 @@
 import filter from 'redux-storage-decorator-filter';
+import { compact } from 'lodash';
 import thunk from 'redux-thunk';
 import promiseMiddleware from 'redux-promise';
 import { Provider } from 'react-redux';
@@ -38,11 +39,13 @@ const middlewares = [
   storage.createMiddleware(engine, BLACKLISTED_ACTIONS, WHITELISTED_ACTIONS)
 ];
 
+const composeOptions = compact([
+  applyMiddleware(...middlewares),
+  __DEV__ && window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+]);
+
 const storeWithMiddleware = createStore(reducer,
-  compose(
-    applyMiddleware(...middlewares),
-    __DEV__ && window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-  )
+  compose(...composeOptions)
 );
 
 export default storeWithMiddleware;
