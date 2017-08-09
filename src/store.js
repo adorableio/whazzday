@@ -1,20 +1,22 @@
-import filter                              from 'redux-storage-decorator-filter'
-import thunk                               from 'redux-thunk';
-import promiseMiddleware                   from 'redux-promise';
-import {Provider}                          from 'react-redux';
-import {compose,
-        createStore,
-        applyMiddleware,
-        combineReducers}                   from 'redux';
+import filter from 'redux-storage-decorator-filter';
+import thunk from 'redux-thunk';
+import promiseMiddleware from 'redux-promise';
+import { Provider } from 'react-redux';
+import {
+  compose,
+  createStore,
+  applyMiddleware,
+  combineReducers,
+} from 'redux';
 
-import * as storage                        from 'redux-storage'
-import createEngine                        from 'redux-storage-engine-reactnativeasyncstorage';
+import * as storage from 'redux-storage';
+import createEngine from 'redux-storage-engine-reactnativeasyncstorage';
 
-import * as reducers                       from './reducers';
+import * as reducers from './reducers';
 
-const reducer = storage.reducer(combineReducers({...reducers}));
+const reducer = storage.reducer(combineReducers({ ...reducers }));
 
-const engine = createEngine('cardigan-app');
+const engine = createEngine('whazzday');
 export const loadStoreFromAsyncStorage = storage.createLoader(engine);
 
 // Do not save our app state to AsyncStorage, let us resolve that on our own
